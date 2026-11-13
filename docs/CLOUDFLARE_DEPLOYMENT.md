@@ -7,7 +7,18 @@ The React dashboard, Worker API, database, and optional object storage can run o
 1. Sign in to Cloudflare and install dependencies with npm install.
 2. Create a D1 database: npx wrangler d1 create openfolio.
 3. Copy the returned database_id into wrangler.jsonc.
-4. Create the optional R2 bucket: npx wrangler r2 bucket create openfolio-assets.
+4. R2 is optional. The application works without image uploads. To enable uploads, create a bucket with npx wrangler r2 bucket create openfolio-assets, then add the optional BUCKET binding shown below to wrangler.jsonc.
+
+To enable R2 uploads, add this top-level binding to wrangler.jsonc after creating the bucket:
+
+```jsonc
+"r2_buckets": [
+  {
+    "binding": "BUCKET",
+    "bucket_name": "openfolio-assets"
+  }
+]
+```
 
 ## Apply migrations
 
