@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local Worker secrets. Never commit .dev.vars.
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+# Generate with: openssl rand -base64 32
+GITHUB_TOKEN_ENCRYPTION_KEY=
+APP_BASE_URL=http://localhost:5173
+ENVIRONMENT=development
