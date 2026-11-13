@@ -42,6 +42,11 @@ function decode(value: string): Uint8Array {
   const raw = atob(value.replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(raw, (character) => character.charCodeAt(0));
 }
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
 async function hash(value: string): Promise<string> {
   return encode(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
 }
@@ -49,17 +54,17 @@ async function keyFromEnv(env: Env): Promise<CryptoKey> {
   if (!env.GITHUB_TOKEN_ENCRYPTION_KEY) throw new Error("GitHub token encryption is not configured.");
   const raw = decode(env.GITHUB_TOKEN_ENCRYPTION_KEY);
   if (raw.byteLength !== 32) throw new Error("GITHUB_TOKEN_ENCRYPTION_KEY must decode to exactly 32 bytes.");
-  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+  return crypto.subtle.importKey("raw", toArrayBuffer(raw), { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 async function encrypt(value: string, env: Env): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await keyFromEnv(env), new TextEncoder().encode(value));
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, await keyFromEnv(env), toArrayBuffer(new TextEncoder().encode(value)));
   return encode(iv) + "." + encode(new Uint8Array(ciphertext));
 }
 async function decrypt(value: string, env: Env): Promise<string> {
   const parts = value.split(".");
   if (parts.length !== 2) throw new Error("Stored GitHub token is invalid.");
-  const clear = await crypto.subtle.decrypt({ name: "AES-GCM", iv: decode(parts[0]) }, await keyFromEnv(env), decode(parts[1]));
+  const clear = await crypto.subtle.decrypt({ name: "AES-GCM", iv: toArrayBuffer(decode(parts[0])) }, await keyFromEnv(env), toArrayBuffer(decode(parts[1])));
   return new TextDecoder().decode(clear);
 }
 function cookies(header: string | null): Record<string, string> {
