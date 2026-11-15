@@ -1,3 +1,6 @@
+<p align="center"><strong>Free, open-source developer portfolios powered by public GitHub work.</strong></p>
+<p align="center"><img alt="React" src="https://img.shields.io/badge/React-19-149ECA?logo=react" /> <img alt="Vite" src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" /> <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript" /> <img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" /> <img alt="D1" src="https://img.shields.io/badge/Database-D1%20%2B%20R2-F38020?logo=cloudflare" /> <img alt="Tests" src="https://img.shields.io/badge/Tests-Vitest-6E9F18?logo=vitest" /></p>
+
 # Openfolio
 
 **Your work, in focus.** Openfolio is a free, open-source developer portfolio platform powered by public GitHub work.
@@ -22,6 +25,22 @@ Connect GitHub, choose the projects you want to show, add your story, select a t
 ## Stack
 
 React, Vite, TypeScript, Cloudflare Workers, D1, R2, Drizzle ORM, GitHub OAuth, Vitest, and GitHub Actions.
+
+## Architecture overview
+
+~~~mermaid
+flowchart TD
+  U[Portfolio owner] --> UI[React and Vite dashboard]
+  UI --> AUTH[GitHub OAuth]
+  AUTH --> API[Cloudflare Worker API]
+  API --> GH[GitHub public profile and repositories]
+  API --> DB[(Cloudflare D1)]
+  API --> R2[(Optional R2 image storage)]
+  DB --> SSR[Public server-rendered portfolio]
+  SSR --> V[Visitor at /@username]
+~~~
+
+The application imports public GitHub data only. It does not request private repository access or repository write permissions.
 
 ## Local development
 
